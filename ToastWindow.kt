@@ -178,6 +178,7 @@ class Toast {
     }
 
     private fun playSound() {
+
         val soundPath = if (config.openSound == OpenSound.MUSIC) {
             "1.mp3"
         } else {
@@ -224,16 +225,16 @@ class Toast {
         anim.node = root
         when (config.windowPosition)  {
             WindowPosition.UPPER_LEFT -> {
-                anim.fromX = -config.windowWidth
-                anim.toX = 0.0
+                anim.fromX = 0.0
+                anim.toX = -config.windowWidth
             }
             WindowPosition.UPPER_RIGHT -> {
-                anim.fromX = config.windowWidth
-                anim.toX = 0.0
+                anim.fromX = 0.0
+                anim.toX = config.windowWidth
             }
             WindowPosition.BOTTOM_LEFT -> {
-                anim.fromX = -config.windowWidth
-                anim.toX = 0.0
+                anim.fromX = 0.0
+                anim.toX = -config.windowWidth
             }
             WindowPosition.BOTTOM_RIGHT -> {
                 anim.fromX = 0.0
