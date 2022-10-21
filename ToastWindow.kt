@@ -9,6 +9,8 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.image.Image
+import javafx.scene.layout.Border
+import javafx.scene.layout.BorderImage
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
@@ -35,6 +37,10 @@ enum class WindowPosition {
     UPPER_LEFT, UPPER_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
 }
 
+enum class OpenSound {
+    MUSIC, KNOCK, DRUMS
+}
+
 class Config {
     var alpha = 0.9
     var openTime = 4900.0
@@ -46,16 +52,15 @@ class Config {
     var message = "MESSAGE"
     var appName = "APP NAME"
     var image = "https://creativereview.imgix.net/content/uploads/2018/10/13.jpg?auto=compress,format&q=60&w=1200&h=1217"
-    var media = "1.mp3"
+    var openSound = OpenSound.KNOCK
     var windowPosition = WindowPosition.BOTTOM_RIGHT
 }
 
 class Toast {
     private var config = Config()
-    private val windows = Stage()
+    private var windows = Stage()
     private var root = BorderPane()
     private var box = HBox()
-
 
     class Builder {
         private var config = Config()
@@ -84,10 +89,8 @@ class Toast {
         }
     }
 
-
     private fun build() {
         windows.initStyle(StageStyle.TRANSPARENT)
-
         val width = config.windowWidth
 
         val height = config.windowHeight
@@ -116,9 +119,9 @@ class Toast {
 
         windows.scene = Scene(root, width, height)
         windows.scene.fill = Color.TRANSPARENT
-        //windows.scene.stylesheets.add("assets/css/style.css")
 
-        root.style = "-fx-background-color: #000000"
+        root.style = "-fx-background-color: #000000; -fx-border-width: 3; -fx-border-color: blue;" +
+                "-fx-padding: 10, 0, 0, 0 "
         root.setPrefSize(width, height)
 
         setImage()
@@ -138,13 +141,18 @@ class Toast {
         box.children.add(vbox)
         root.center = box
 
+        val hbox = HBox()
         val button = Button("Ok")
-        button.style = ("-fx-background-color: yellow")
-        vbox.children.add(button)
+        val button2 = Button("Close")
+        button2.style = (" -fx-background-color: orange; -fx-padding: 3 20 3 20; -fx-text-fill: black;")
+        button.style = (" -fx-background-color: #3c7fb1; -fx-padding: 3 30 3 30; -fx-text-fill: black;")
+        hbox.style = ("-fx-padding: 1 0 40 110")
+        hbox.spacing = 10.0
 
-        //val config = Config()
-        //val media = Media(Paths.get(config.media).toUri().toString())
-        //val mediaPlayer = MediaPlayer(media)
+
+        hbox.children.addAll(button, button2)
+        box.children.add(hbox)
+        root.bottom = hbox
     }
 
     private fun setImage() {
@@ -152,26 +160,35 @@ class Toast {
             return
         }
 
+        val circle = Circle(50.0, 50.0, 50.0)
+        circle.centerX = 50.0
+        circle.centerY = 50.0
         val iconBorder = if (config.imageType == ImageStyle.RECTANGLE) {
             Rectangle(100.0, 100.0)
         }
         else {
-            Circle(50.0, 50.0, 50.0)
+            circle
         }
-        iconBorder.setFill(ImagePattern(Image(config.image)))
+
+        val image = Image(config.image)
+
+        iconBorder.fill = ImagePattern(image)
+
         box.children.add(iconBorder)
     }
 
     private fun playSound() {
-        /*val media = Media(Paths.get(config.media).toUri().toString())
-        val mediaPlayer = MediaPlayer(media)
-        mediaPlayer.cycleCount = 1;
-        mediaPlayer.volume = 2.0
-        mediaPlayer.play()*/
-
-        var bip = config.media
-        val hit = Media(Paths.get(bip).toUri().toString())
-        val mediaPlayer = AudioClip(hit.source)
+        val soundPath = if (config.openSound == OpenSound.MUSIC) {
+            "1.mp3"
+        } else {
+            if (config.openSound == OpenSound.KNOCK) {
+                "2.mp3"
+            } else {
+                "3.mp3"
+            }
+        }
+        val media = Media(Paths.get(soundPath).toUri().toString())
+        val mediaPlayer = AudioClip(media.source)
         mediaPlayer.play();
     }
 
@@ -265,7 +282,6 @@ class Toast {
     }
 
 }
-
 
 class SomeClass: Application() {
     override fun start(p0: Stage?) {
