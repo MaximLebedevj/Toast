@@ -9,8 +9,6 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.image.Image
-import javafx.scene.layout.Border
-import javafx.scene.layout.BorderImage
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
@@ -20,6 +18,7 @@ import javafx.scene.paint.Color
 import javafx.scene.paint.ImagePattern
 import javafx.scene.shape.Circle
 import javafx.scene.shape.Rectangle
+import javafx.stage.Screen
 import javafx.stage.Stage
 import javafx.stage.StageStyle
 import javafx.util.Duration
@@ -61,6 +60,7 @@ class Toast {
     private var windows = Stage()
     private var root = BorderPane()
     private var box = HBox()
+    private var screenBounds = Screen.getPrimary().visualBounds
 
     class Builder {
         private var config = Config()
@@ -91,12 +91,14 @@ class Toast {
 
     private fun build() {
         windows.initStyle(StageStyle.TRANSPARENT)
+        windows.sizeToScene()
         val width = config.windowWidth
-
         val height = config.windowHeight
+        windows.scene = Scene(root, width, height)
+        windows.scene.fill = Color.TRANSPARENT
 
-        val edgeRight = (config.screenSize.width - width)
-        val edgeBottom = (config.screenSize.height - height)
+        val edgeRight = (config.screenSize.width - windows.scene.width)
+        val edgeBottom = (config.screenSize.height - windows.scene.height)
 
         when(config.windowPosition) {
             WindowPosition.UPPER_LEFT ->  {
@@ -117,12 +119,11 @@ class Toast {
             }
         }
 
-        windows.scene = Scene(root, width, height)
-        windows.scene.fill = Color.TRANSPARENT
+
 
         root.style = "-fx-background-color: #000000; -fx-border-width: 3; -fx-border-color: blue;" +
                 "-fx-padding: 10, 0, 0, 0 "
-        root.setPrefSize(width, height)
+        root.setPrefSize(windows.scene.width, windows.scene.height)
 
         setImage()
 
@@ -144,11 +145,14 @@ class Toast {
         val hbox = HBox()
         val button = Button("Ok")
         val button2 = Button("Close")
+        val button3 = Button("POP")
+        val button4 = Button("Hello")
         button2.style = (" -fx-background-color: orange; -fx-padding: 3 20 3 20; -fx-text-fill: black;")
         button.style = (" -fx-background-color: #3c7fb1; -fx-padding: 3 30 3 30; -fx-text-fill: black;")
         hbox.style = ("-fx-padding: 1 0 40 110")
         hbox.spacing = 10.0
 
+        //vbox.children.addAll(button3, button4)
 
         hbox.children.addAll(button, button2)
         box.children.add(hbox)
@@ -159,15 +163,11 @@ class Toast {
         if (config.image.isEmpty()) {
             return
         }
-
-        val circle = Circle(50.0, 50.0, 50.0)
-        circle.centerX = 50.0
-        circle.centerY = 50.0
         val iconBorder = if (config.imageType == ImageStyle.RECTANGLE) {
             Rectangle(100.0, 100.0)
         }
         else {
-            circle
+            Circle(50.0, 50.0, 50.0)
         }
 
         val image = Image(config.image)
