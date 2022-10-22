@@ -1,4 +1,4 @@
-package com.maxim.toastwindow
+package com.example.demo
 
 import javafx.animation.FadeTransition
 import javafx.animation.TranslateTransition
@@ -18,12 +18,12 @@ import javafx.scene.paint.Color
 import javafx.scene.paint.ImagePattern
 import javafx.scene.shape.Circle
 import javafx.scene.shape.Rectangle
+import javafx.stage.Screen
 import javafx.stage.Stage
 import javafx.stage.StageStyle
 import javafx.util.Duration
-import java.awt.Dimension
-import java.awt.Toolkit
 import java.nio.file.Paths
+import kotlin.system.exitProcess
 
 //notifications
 
@@ -35,27 +35,34 @@ enum class WindowPosition {
     UPPER_LEFT, UPPER_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
 }
 
+enum class OpenSound {
+    MUSIC, KNOCK, DRUMS
+}
+
+enum class Animations {
+    FADE, TRANSITION
+}
+
 class Config {
     var alpha = 0.9
     var openTime = 4900.0
-    var windowWidth = 300.0
-    var windowHeight = 150.0
-    val screenSize: Dimension = Toolkit.getDefaultToolkit().screenSize
     var imageType = ImageStyle.CIRCLE
     var title = "TITLE"
     var message = "MESSAGE"
     var appName = "APP NAME"
     var image = "https://creativereview.imgix.net/content/uploads/2018/10/13.jpg?auto=compress,format&q=60&w=1200&h=1217"
-    var media = "1.mp3"
-    var windowPosition = WindowPosition.BOTTOM_RIGHT
+    var openSound = OpenSound.KNOCK
+    var windowPosition = WindowPosition.UPPER_RIGHT
+    var animationType = Animations.TRANSITION
+    var addButtons = true
 }
 
 class Toast {
     private var config = Config()
-    private val windows = Stage()
+    private var windows = Stage()
     private var root = BorderPane()
     private var box = HBox()
-
+    private var primaryScreenBounds = Screen.getPrimary().getVisualBounds()
 
     class Builder {
         private var config = Config()
@@ -76,50 +83,22 @@ class Toast {
         }
 
         fun build(): Toast  {
-            var toast = Toast()
+            val toast = Toast()
             toast.config = config
             toast.build()
-
             return toast
         }
     }
 
-
     private fun build() {
         windows.initStyle(StageStyle.TRANSPARENT)
-
-        val width = config.windowWidth
-
-        val height = config.windowHeight
-
-        val edgeRight = (config.screenSize.width - width)
-        val edgeBottom = (config.screenSize.height - height)
-
-        when(config.windowPosition) {
-            WindowPosition.UPPER_LEFT ->  {
-                windows.x = 0.0
-                windows.y = 0.0
-            }
-            WindowPosition.UPPER_RIGHT -> {
-                windows.x = edgeRight
-                windows.y = 0.0
-            }
-            WindowPosition.BOTTOM_LEFT -> {
-                windows.x = 0.0
-                windows.y = edgeBottom
-            }
-            WindowPosition.BOTTOM_RIGHT -> {
-                windows.x = edgeRight;
-                windows.y = edgeBottom
-            }
-        }
-
-        windows.scene = Scene(root, width, height)
+        windows.scene = Scene(root)
         windows.scene.fill = Color.TRANSPARENT
-        //windows.scene.stylesheets.add("assets/css/style.css")
+        windows.sizeToScene()
 
-        root.style = "-fx-background-color: #000000"
-        root.setPrefSize(width, height)
+        root.style = "-fx-background-color: #000000; -fx-border-width: 3; -fx-border-color: blue;" +
+                "-fx-padding: 10, 0, 0, 0 "
+        root.setPrefSize(windows.scene.width, windows.scene.height)
 
         setImage()
 
@@ -127,6 +106,7 @@ class Toast {
 
         val title = Label(config.title)
         title.style = ("-fx-font-family: fantasy; -fx-font-size: 18px; -fx-text-fill : red; -fx-label-padding: 0.9em 0 0 1.2em; -fx-underline: true;")
+        title.setMinSize(125.0, 30.0)
 
         val message = Label(config.message)
         message.style = ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : orange; -fx-label-padding: 0.05em 0 0 1.2em")
@@ -138,139 +118,167 @@ class Toast {
         box.children.add(vbox)
         root.center = box
 
-        val button = Button("Ok")
-        button.style = ("-fx-background-color: yellow")
-        vbox.children.add(button)
+        if (config.addButtons) {
+            val hbox = HBox()
+            val button = Button("Ok")
+            val button2 = Button("Close")
+            button.style = (" -fx-background-color: #3c7fb1; -fx-padding: 3 30 3 30; -fx-text-fill: black;")
+            button.setMinSize(100.0, 20.0)
+            button2.style = (" -fx-background-color: orange; -fx-padding: 3 20 3 20; -fx-text-fill: black;")
+            button2.setMinSize(100.0, 20.0)
+            hbox.style = ("-fx-padding: 1 0 20 110")
+            hbox.spacing = 10.0
 
-        //val config = Config()
-        //val media = Media(Paths.get(config.media).toUri().toString())
-        //val mediaPlayer = MediaPlayer(media)
+            hbox.children.addAll(button, button2)
+            box.children.add(hbox)
+            root.bottom = hbox
+        }
+
     }
 
     private fun setImage() {
         if (config.image.isEmpty()) {
             return
         }
-
         val iconBorder = if (config.imageType == ImageStyle.RECTANGLE) {
             Rectangle(100.0, 100.0)
         }
         else {
             Circle(50.0, 50.0, 50.0)
         }
-        iconBorder.setFill(ImagePattern(Image(config.image)))
+
+        val image = Image(config.image)
+        iconBorder.fill = ImagePattern(image)
         box.children.add(iconBorder)
     }
 
     private fun playSound() {
-        /*val media = Media(Paths.get(config.media).toUri().toString())
-        val mediaPlayer = MediaPlayer(media)
-        mediaPlayer.cycleCount = 1;
-        mediaPlayer.volume = 2.0
-        mediaPlayer.play()*/
 
-        var bip = config.media
-        val hit = Media(Paths.get(bip).toUri().toString())
-        val mediaPlayer = AudioClip(hit.source)
-        mediaPlayer.play();
-    }
-
-    private fun openTranslateTransition() {
-        playSound()
-        val anim = TranslateTransition()
-        anim.duration = Duration.seconds(1.25)
-        anim.node = root
-        when (config.windowPosition)  {
-            WindowPosition.UPPER_LEFT -> {
-                anim.fromX = -config.windowWidth
-                anim.toX = 0.0
-            }
-            WindowPosition.UPPER_RIGHT -> {
-                anim.fromX = config.windowWidth
-                anim.toX = 0.0
-            }
-            WindowPosition.BOTTOM_LEFT -> {
-                anim.fromX = -config.windowWidth
-                anim.toX = 0.0
-            }
-            WindowPosition.BOTTOM_RIGHT -> {
-                anim.fromX = config.windowWidth
-                anim.toX = 0.0
+        val soundPath = if (config.openSound == OpenSound.MUSIC) {
+            "1.mp3"
+        } else {
+            if (config.openSound == OpenSound.KNOCK) {
+                "2.mp3"
+            } else {
+                "3.mp3"
             }
         }
-        anim.play()
-    }
-
-    private fun closeTranslateTransition() {
-        val anim = TranslateTransition()
-        anim.duration = Duration.seconds(1.25)
-        anim.node = root
-        when (config.windowPosition)  {
-            WindowPosition.UPPER_LEFT -> {
-                anim.fromX = -config.windowWidth
-                anim.toX = 0.0
-            }
-            WindowPosition.UPPER_RIGHT -> {
-                anim.fromX = config.windowWidth
-                anim.toX = 0.0
-            }
-            WindowPosition.BOTTOM_LEFT -> {
-                anim.fromX = -config.windowWidth
-                anim.toX = 0.0
-            }
-            WindowPosition.BOTTOM_RIGHT -> {
-                anim.fromX = 0.0
-                anim.toX = config.windowWidth
-            }
-        }
-        anim.onFinished = EventHandler {
-            Platform.exit()
-            System.exit(0)
-        }
-        anim.play()
+        val media = Media(Paths.get(soundPath).toUri().toString())
+        val mediaPlayer = AudioClip(media.source)
+        mediaPlayer.play()
     }
 
     private fun openAnimation() {
         playSound()
-        val anim = FadeTransition(Duration.millis(1500.0), root)
-        anim.fromValue = 0.0
-        anim.toValue = config.alpha
-        anim.cycleCount = 1
-        anim.play()
-    }
-    private fun closeAnimation() {
-        val anim = FadeTransition(Duration.millis(1500.0), root)
-        anim.fromValue = config.alpha
-        anim.toValue = 0.0
-        anim.cycleCount = 1
-        anim.onFinished = EventHandler {
-            Platform.exit()
-            System.exit(0)
+        when(config.windowPosition) {
+            WindowPosition.UPPER_LEFT -> {
+                windows.x = 0.0
+                windows.y = 0.0
+            }
+            WindowPosition.UPPER_RIGHT -> {
+                windows.x = primaryScreenBounds.width - windows.scene.width
+                windows.y = 0.0
+            }
+            WindowPosition.BOTTOM_LEFT -> {
+                windows.x = 0.0
+                windows.y = primaryScreenBounds.height - windows.scene.height
+            }
+            WindowPosition.BOTTOM_RIGHT -> {
+                windows.x = primaryScreenBounds.width - windows.scene.width
+                windows.y = primaryScreenBounds.height - windows.scene.height
+            }
         }
-        anim.play()
+
+
+        if (config.animationType == Animations.TRANSITION) {
+            val anim = TranslateTransition(Duration.millis(1500.0), root)
+            when (config.windowPosition) {
+                WindowPosition.UPPER_LEFT -> {
+                    anim.setFromX(-windows.scene.width)
+                    anim.setByX(windows.scene.width)
+                }
+                WindowPosition.UPPER_RIGHT -> {
+                    anim.setFromX(windows.scene.width)
+                    anim.setByX(-windows.scene.width)
+                }
+                WindowPosition.BOTTOM_LEFT -> {
+                    anim.setFromX(-windows.scene.width)
+                    anim.setByX(windows.scene.width)
+                }
+                WindowPosition.BOTTOM_RIGHT -> {
+                    anim.setFromX(windows.scene.width)
+                    anim.setByX(-windows.scene.width)
+                }
+            }
+            anim.play()
+        } else {
+            if (config.animationType == Animations.FADE) {
+                val anim = FadeTransition(Duration.millis(1500.0), root)
+                anim.fromValue = 0.0
+                anim.toValue = config.alpha
+                anim.cycleCount = 1
+                anim.play()
+            }
+        }
+    }
+
+    private fun closeAnimation() {
+        if (config.animationType == Animations.TRANSITION) {
+            val anim = TranslateTransition(Duration.millis(1500.0), root)
+            when (config.windowPosition)  {
+                WindowPosition.UPPER_LEFT -> {
+                    anim.byX = -windows.scene.width
+                }
+                WindowPosition.UPPER_RIGHT -> {
+                    anim.byX = windows.scene.width
+                }
+                WindowPosition.BOTTOM_LEFT -> {
+                    anim.byX = -windows.scene.width
+                }
+                WindowPosition.BOTTOM_RIGHT -> {
+                    anim.byX = windows.scene.width
+                }
+            }
+            anim.onFinished = EventHandler {
+                Platform.exit()
+                exitProcess(0)
+            }
+            anim.play()
+        } else {
+            if (config.animationType == Animations.FADE) {
+                val anim = FadeTransition(Duration.millis(1500.0), root)
+                anim.fromValue = config.alpha
+                anim.toValue = 0.0
+                anim.cycleCount = 1
+                anim.onFinished = EventHandler {
+                    Platform.exit()
+                    exitProcess(0)
+                }
+                anim.play()
+            }
+        }
     }
 
     fun start() {
         windows.show()
-        openTranslateTransition()
+        openAnimation()
         val thread = Thread {
             try {
                 Thread.sleep(config.openTime.toLong())
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
-            closeTranslateTransition()
+            closeAnimation()
         }
         Thread(thread).start()
     }
 
 }
 
-
 class SomeClass: Application() {
     override fun start(p0: Stage?) {
         var toast = Toast.Builder()
-            .setTitle("New notification")
+            .setTitle("Notification")
             .setMessage("Iron Man 2")
             .setAppName("AC/DC")
             .build()
