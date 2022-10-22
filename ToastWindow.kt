@@ -50,7 +50,8 @@ class Config {
     var title = "TITLE"
     var message = "MESSAGE"
     var appName = "APP NAME"
-    var image = "https://creativereview.imgix.net/content/uploads/2018/10/13.jpg?auto=compress,format&q=60&w=1200&h=1217"
+    var image =
+        "https://creativereview.imgix.net/content/uploads/2018/10/13.jpg?auto=compress,format&q=60&w=1200&h=1217"
     var openSound = OpenSound.KNOCK
     var windowPosition = WindowPosition.UPPER_RIGHT
     var animationType = Animations.TRANSITION
@@ -62,7 +63,7 @@ class Toast {
     private var windows = Stage()
     private var root = BorderPane()
     private var box = HBox()
-    private var primaryScreenBounds = Screen.getPrimary().getVisualBounds()
+    private var primaryScreenBounds = Screen.getPrimary().visualBounds
 
     class Builder {
         private var config = Config()
@@ -82,7 +83,7 @@ class Toast {
             return this
         }
 
-        fun build(): Toast  {
+        fun build(): Toast {
             val toast = Toast()
             toast.config = config
             toast.build()
@@ -105,14 +106,17 @@ class Toast {
         val vbox = VBox()
 
         val title = Label(config.title)
-        title.style = ("-fx-font-family: fantasy; -fx-font-size: 18px; -fx-text-fill : red; -fx-label-padding: 0.9em 0 0 1.2em; -fx-underline: true;")
+        title.style =
+            ("-fx-font-family: fantasy; -fx-font-size: 18px; -fx-text-fill : red; -fx-label-padding: 0.9em 0 0 1.2em; -fx-underline: true;")
         title.setMinSize(125.0, 30.0)
 
         val message = Label(config.message)
-        message.style = ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : orange; -fx-label-padding: 0.05em 0 0 1.2em")
+        message.style =
+            ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : orange; -fx-label-padding: 0.05em 0 0 1.2em")
 
         val appName = Label(config.appName)
-        appName.style = ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : yellow; -fx-label-padding: 0.05em 0 0.5em 1.2em")
+        appName.style =
+            ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : yellow; -fx-label-padding: 0.05em 0 0.5em 1.2em")
 
         vbox.children.addAll(title, message, appName)
         box.children.add(vbox)
@@ -142,8 +146,7 @@ class Toast {
         }
         val iconBorder = if (config.imageType == ImageStyle.RECTANGLE) {
             Rectangle(100.0, 100.0)
-        }
-        else {
+        } else {
             Circle(50.0, 50.0, 50.0)
         }
 
@@ -170,19 +173,22 @@ class Toast {
 
     private fun openAnimation() {
         playSound()
-        when(config.windowPosition) {
+        when (config.windowPosition) {
             WindowPosition.UPPER_LEFT -> {
                 windows.x = 0.0
                 windows.y = 0.0
             }
+
             WindowPosition.UPPER_RIGHT -> {
                 windows.x = primaryScreenBounds.width - windows.scene.width
                 windows.y = 0.0
             }
+
             WindowPosition.BOTTOM_LEFT -> {
                 windows.x = 0.0
                 windows.y = primaryScreenBounds.height - windows.scene.height
             }
+
             WindowPosition.BOTTOM_RIGHT -> {
                 windows.x = primaryScreenBounds.width - windows.scene.width
                 windows.y = primaryScreenBounds.height - windows.scene.height
@@ -194,20 +200,23 @@ class Toast {
             val anim = TranslateTransition(Duration.millis(1500.0), root)
             when (config.windowPosition) {
                 WindowPosition.UPPER_LEFT -> {
-                    anim.setFromX(-windows.scene.width)
-                    anim.setByX(windows.scene.width)
+                    anim.fromX = -windows.scene.width
+                    anim.byX = windows.scene.width
                 }
+
                 WindowPosition.UPPER_RIGHT -> {
-                    anim.setFromX(windows.scene.width)
-                    anim.setByX(-windows.scene.width)
+                    anim.fromX = windows.scene.width
+                    anim.byX = -windows.scene.width
                 }
+
                 WindowPosition.BOTTOM_LEFT -> {
-                    anim.setFromX(-windows.scene.width)
-                    anim.setByX(windows.scene.width)
+                    anim.fromX = -windows.scene.width
+                    anim.byX = windows.scene.width
                 }
+
                 WindowPosition.BOTTOM_RIGHT -> {
-                    anim.setFromX(windows.scene.width)
-                    anim.setByX(-windows.scene.width)
+                    anim.fromX = windows.scene.width
+                    anim.byX = -windows.scene.width
                 }
             }
             anim.play()
@@ -225,16 +234,19 @@ class Toast {
     private fun closeAnimation() {
         if (config.animationType == Animations.TRANSITION) {
             val anim = TranslateTransition(Duration.millis(1500.0), root)
-            when (config.windowPosition)  {
+            when (config.windowPosition) {
                 WindowPosition.UPPER_LEFT -> {
                     anim.byX = -windows.scene.width
                 }
+
                 WindowPosition.UPPER_RIGHT -> {
                     anim.byX = windows.scene.width
                 }
+
                 WindowPosition.BOTTOM_LEFT -> {
                     anim.byX = -windows.scene.width
                 }
+
                 WindowPosition.BOTTOM_RIGHT -> {
                     anim.byX = windows.scene.width
                 }
@@ -275,15 +287,16 @@ class Toast {
 
 }
 
-class SomeClass: Application() {
+class SomeClass : Application() {
     override fun start(p0: Stage?) {
-        var toast = Toast.Builder()
+        val toast = Toast.Builder()
             .setTitle("Notification")
             .setMessage("Iron Man 2")
             .setAppName("AC/DC")
             .build()
         toast.start()
     }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
