@@ -50,11 +50,10 @@ class Config {
     var title = "TITLE"
     var message = "MESSAGE"
     var appName = "APP NAME"
-    var image =
-        "https://creativereview.imgix.net/content/uploads/2018/10/13.jpg?auto=compress,format&q=60&w=1200&h=1217"
+    var image = "https://creativereview.imgix.net/content/uploads/2018/10/13.jpg?auto=compress,format&q=60&w=1200&h=1217"
     var openSound = OpenSound.KNOCK
     var windowPosition = WindowPosition.UPPER_RIGHT
-    var animationType = Animations.TRANSITION
+    var animationType = Animations.FADE
     var addButtons = true
 }
 
@@ -97,8 +96,7 @@ class Toast {
         windows.scene.fill = Color.TRANSPARENT
         windows.sizeToScene()
 
-        root.style = "-fx-background-color: #000000; -fx-border-width: 3; -fx-border-color: blue;" +
-                "-fx-padding: 10, 0, 0, 0 "
+        root.style = "-fx-background-color: #000000; -fx-border-width: 3; -fx-border-color: blue; -fx-padding: 10, 0, 0, 0 "
         root.setPrefSize(windows.scene.width, windows.scene.height)
 
         setImage()
