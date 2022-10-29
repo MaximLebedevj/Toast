@@ -25,7 +25,6 @@ import javafx.util.Duration
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
-//notifications
 
 enum class ImageStyle {
     CIRCLE, RECTANGLE
@@ -43,6 +42,10 @@ enum class Animations {
     FADE, TRANSITION
 }
 
+enum class TextStyle {
+    COLORED, WHITE
+}
+
 class Config {
     var alpha = 0.9
     var openTime = 4900.0
@@ -52,9 +55,10 @@ class Config {
     var appName = "APP NAME"
     var image = "https://creativereview.imgix.net/content/uploads/2018/10/13.jpg?auto=compress,format&q=60&w=1200&h=1217"
     var openSound = OpenSound.KNOCK
-    var windowPosition = WindowPosition.UPPER_RIGHT
-    var animationType = Animations.FADE
+    var windowPosition = WindowPosition.UPPER_LEFT
+    var animationType = Animations.TRANSITION
     var addButtons = true
+    var textStyle = TextStyle.COLORED
 }
 
 class Toast {
@@ -104,17 +108,25 @@ class Toast {
         val vbox = VBox()
 
         val title = Label(config.title)
-        title.style =
-            ("-fx-font-family: fantasy; -fx-font-size: 18px; -fx-text-fill : red; -fx-label-padding: 0.9em 0 0 1.2em; -fx-underline: true;")
+
         title.setMinSize(125.0, 30.0)
 
         val message = Label(config.message)
-        message.style =
-            ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : orange; -fx-label-padding: 0.05em 0 0 1.2em")
 
         val appName = Label(config.appName)
-        appName.style =
-            ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : yellow; -fx-label-padding: 0.05em 0 0.5em 1.2em")
+
+        when (config.textStyle) {
+            TextStyle.COLORED -> {
+                title.style = ("-fx-font-family: fantasy; -fx-font-size: 18px; -fx-text-fill : red; -fx-label-padding: 0.9em 0 0 1.2em; -fx-underline: true;")
+                message.style = ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : orange; -fx-label-padding: 0.05em 0 0 1.2em")
+                appName.style = ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : yellow; -fx-label-padding: 0.05em 0 0.5em 1.2em")
+            }
+            TextStyle.WHITE -> {
+                title.style = ("-fx-font-family: fantasy; -fx-font-size: 18px; -fx-text-fill : white; -fx-label-padding: 0.9em 0 0 1.2em; -fx-underline: true;")
+                message.style = ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : white; -fx-label-padding: 0.05em 0 0 1.2em")
+                appName.style = ("-fx-font-style: italic; -fx-font-size: 16px; -fx-text-fill : white; -fx-label-padding: 0.05em 0 0.5em 1.2em")
+            }
+        }
 
         vbox.children.addAll(title, message, appName)
         box.children.add(vbox)
